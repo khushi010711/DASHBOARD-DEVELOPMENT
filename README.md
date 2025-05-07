@@ -1,70 +1,59 @@
 # DASHBOARD-DEVELOPMENT
 
-import dash
-from dash import dcc, html, Input, Output
-import pandas as pd
-import numpy as np
-import plotly.express as px
 
-# Simulate financial transaction dataset
-np.random.seed(42)
-n_rows = 100_000
-categories = ['Groceries', 'Electronics', 'Clothing', 'Entertainment', 'Health']
-customers = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve']
 
-df = pd.DataFrame({
-    'transaction_id': np.arange(n_rows),
-    'category': np.random.choice(categories, n_rows),
-    'customer': np.random.choice(customers, n_rows),
-    'amount': np.random.uniform(5, 500, n_rows)  # transaction amounts between $5 and $500
-})
 
-# Start Dash app
-app = dash.Dash(__name__)
-app.title = "Financial Transactions Dashboard"
 
-# Layout
-app.layout = html.Div([
-    html.H1("Interactive Financial Transactions Dashboard"),
 
-    dcc.Dropdown(
-        id='customer-dropdown',
-        options=[{'label': cust, 'value': cust} for cust in df['customer'].unique()],
-        value='Alice',
-        clearable=False
-    ),
 
-    html.Div([
-        dcc.Graph(id='total-transactions-category'),
-        dcc.Graph(id='avg-transaction-customer'),
-    ], style={'display': 'flex', 'gap': '2rem'}),
 
-    dcc.Graph(id='transaction-amount-distribution')
-])
+## DESCRIPTION
 
-# Callbacks
-@app.callback(
-    Output('total-transactions-category', 'figure'),
-    Output('avg-transaction-customer', 'figure'),
-    Output('transaction-amount-distribution', 'figure'),
-    Input('customer-dropdown', 'value')
-)
-def update_dashboard(selected_customer):
-    # Total transactions by category
-    transactions_by_category = df.groupby('category')['amount'].sum().reset_index()
-    fig1 = px.bar(transactions_by_category, x='category', y='amount', title='Total Transactions by Category')
+This Python script presents a complete machine learning pipeline for predicting the likelihood of diabetes using the Pima Indians Diabetes dataset. The workflow follows a structured approach encompassing data loading, exploratory data analysis (EDA), preprocessing, feature selection, model training, and evaluation.
 
-    # Average transaction by customer
-    customer_avg = df[df['customer'] == selected_customer].groupby('category')['amount'].mean().reset_index()
-    fig2 = px.bar(customer_avg, x='category', y='amount', title=f'Avg Transaction Value - {selected_customer}')
+#### 1. **Importing Libraries**
 
-    # Distribution of transaction amounts
-    fig3 = px.histogram(df, x='amount', nbins=50, title='Transaction Amount Distribution')
+The script begins by importing essential Python libraries:
 
-    return fig1, fig2, fig3
+* `pandas` and `numpy` for data manipulation.
+* `seaborn` and `matplotlib.pyplot` for data visualization.
+* Scikit-learn modules for preprocessing, feature selection, model training, and evaluation.
 
-# Run the app
-if __name__ == '__main__':
-    app.run(debug=True)
+#### 2. **Loading the Dataset**
+
+The dataset is read using `pandas.read_csv()`, and column names are explicitly defined for clarity. The dataset contains several health-related measurements for female patients, including `Pregnancies`, `Glucose`, `BloodPressure`, `SkinThickness`, `Insulin`, `BMI`, `DiabetesPedigreeFunction`, `Age`, and the target variable `Outcome`, which indicates the presence (1) or absence (0) of diabetes.
+
+#### 3. **Exploratory Data Analysis (EDA)**
+
+Basic EDA is conducted using `head()` to inspect the top records and `describe()` to get statistical summaries. Additionally, a count plot using `seaborn` visualizes the distribution of the target classes (`Outcome`). This helps to understand class imbalance and overall data characteristics.
+
+#### 4. **Feature Selection and Preprocessing**
+
+The dataset is split into features (`X`) and target (`y`). Feature normalization is performed using `StandardScaler` to standardize the values, ensuring that all features contribute equally to the learning algorithm. Next, `SelectKBest` with the `f_classif` scoring function is applied to select the top 5 most relevant features based on statistical significance. This step reduces dimensionality, potentially improving model performance and interpretability. The selected feature names are printed for reference.
+
+#### 5. **Train/Test Split**
+
+The dataset is split into training and testing sets using `train_test_split` with an 80-20 split. This separation ensures that the model can be evaluated on unseen data, providing an unbiased assessment of its performance.
+
+#### 6. **Model Training**
+
+A `RandomForestClassifier`, a robust ensemble learning algorithm, is trained on the selected and scaled features. Random forests operate by constructing multiple decision trees and averaging their predictions, offering strong performance and resilience to overfitting.
+
+#### 7. **Model Evaluation**
+
+The model's predictions on the test data are evaluated using several metrics:
+
+* **Confusion Matrix**: Provides the count of true positives, true negatives, false positives, and false negatives.
+* **Classification Report**: Displays precision, recall, F1-score, and support for each class.
+* **Accuracy Score**: Shows the overall accuracy of the model.
+
+This evaluation helps in understanding how well the model is distinguishing between diabetic and non-diabetic individuals.
+
+#### Overall
+
+This code serves as a foundational framework for binary classification problems in healthcare analytics and beyond. It demonstrates best practices such as data normalization, feature selection, and performance evaluation. With minor adjustments and enhancements (like handling missing values or cross-validation), it can be extended for deeper analysis or adapted for other classification tasks.
+
+Would you like this summary turned into a markdown report or presentation format?
+
 
 
